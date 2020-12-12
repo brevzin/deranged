@@ -3,12 +3,16 @@
 #include <deranged/from_range.h>
 #include <vector>
 #include <list>
+#include "type.h"
 
 TEST_CASE("from_range vector") {
     std::vector<int> v = {1, 2, 3};
     auto r = drng::from_range(v);
     STATIC_REQUIRE(drng::input_drange<decltype(r)>);
     STATIC_REQUIRE(drng::sized_drange<decltype(r)>);
+
+    CHECK(drng::type<drng::value_t<decltype(r)>> == drng::type<int>);
+    CHECK(drng::type<drng::reference_t<decltype(r)>> == drng::type<int&>);
 
     CHECK_FALSE(r.empty());
     CHECK(r.front() == 1);
@@ -24,6 +28,16 @@ TEST_CASE("from_range vector") {
     r.pop_front();
     CHECK(r.empty());
     CHECK(r.size() == 0);
+}
+
+TEST_CASE("from_range const vector") {
+    std::vector<int> const v = {1, 2, 3};
+    auto r = drng::from_range(v);
+    STATIC_REQUIRE(drng::input_drange<decltype(r)>);
+    STATIC_REQUIRE(drng::sized_drange<decltype(r)>);
+
+    CHECK(drng::type<drng::value_t<decltype(r)>> == drng::type<int>);
+    CHECK(drng::type<drng::reference_t<decltype(r)>> == drng::type<int const&>);
 }
 
 TEST_CASE("from_range list") {

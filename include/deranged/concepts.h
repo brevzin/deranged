@@ -29,6 +29,12 @@ concept sized_drange = input_drange<R>
         { cr.size() } -> std::same_as<size_t>;
     };
 
+template <typename R>
+using value_t = typename R::value_type;
+
+template <typename R>
+using reference_t = decltype(std::declval<R&>().front());
+
 }
 
 #endif

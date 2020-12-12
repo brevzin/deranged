@@ -2,11 +2,12 @@
 #define DERANGED_FROM_RANGE_H
 
 #include <ranges>
+#include <deranged/range_base.h>
 
 namespace drng {
 
 template <std::ranges::view V>
-class CppView {
+class CppView : public RangeBase<CppView<V>> {
     struct WithSize {
         WithSize(V& v)
             : value(std::ranges::size(v))
@@ -27,6 +28,8 @@ class CppView {
     [[no_unique_address]] std::conditional_t<store_size, WithSize, WithoutSize> size_cache;
 
 public:
+    using value_type = std::ranges::range_value_t<V>;
+
     explicit CppView(V view)
         : view(std::move(view))
         , first(std::ranges::begin(this->view))
