@@ -6,7 +6,13 @@
 namespace drng {
 
 template <input_drange A, input_drange B>
-auto equal(A a, B b) {
+auto equal(A a, B b) -> bool {
+    if constexpr (sized_drange<A> and sized_drange<B>) {
+        if (a.size() != b.size()) {
+            return false;
+        }
+    }
+
     while (not a.empty() and not b.empty()) {
         if (a.front() != b.front()) {
             return false;

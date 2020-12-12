@@ -5,33 +5,63 @@
 
 namespace drng {
 
-template <std::input_or_output_iterator I, std::sentinel_for<I> S>
-class iter_range {
-    I first;
-    S last;
+template <std::ranges::view V>
+class CppView {
+    struct WithSize {
+        WithSize(V& v)
+            : value(std::ranges::size(v))
+        { }
+        size_t value;
+    };
+    struct WithoutSize {
+        WithoutSize(V&) { }
+    };
+
+    static constexpr bool store_size =
+        std::ranges::sized_range<V> and not std::sized_sentinel_for<
+            std::ranges::sentinel_t<V>, std::ranges::iterator_t<V>>;
+
+
+    V view;
+    std::ranges::iterator_t<V> first;
+    [[no_unique_address]] std::conditional_t<store_size, WithSize, WithoutSize> size_cache;
 
 public:
-    iter_range(I first, S last)
-        : first(std::move(first))
-        , last(std::move(last))
+    explicit CppView(V view)
+        : view(std::move(view))
+        , first(std::ranges::begin(this->view))
+        , size_cache(this->view)
     { }
 
     auto empty() const -> bool {
-        return first == last;
+        return first == std::ranges::end(view);
     }
 
     void pop_front() {
         ++first;
+        if constexpr (store_size) {
+            --size_cache.value;
+        }
     }
 
     auto front() -> decltype(auto) {
         return *first;
-    } 
+    }
+
+    auto size() const -> size_t
+        requires std::ranges::sized_range<V>
+    {
+        if constexpr (store_size) {
+            return size_cache.value;
+        } else {
+            return std::ranges::end(view) - first;
+        }
+    }
 };
 
 template <std::ranges::viewable_range R>
 auto from_range(R&& r) {
-    return iter_range(std::ranges::begin(r), std::ranges::end(r));
+    return CppView(std::views::all(r));
 }
 
 }
