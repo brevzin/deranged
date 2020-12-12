@@ -35,6 +35,10 @@ public:
         return value_ == bound_;
     }
 
+    auto empty() const -> std::false_type requires std::same_as<Bound, std::unreachable_sentinel_t> {
+        return {};
+    }
+
     void pop_front() {
         ++value_;
     }

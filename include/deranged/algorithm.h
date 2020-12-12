@@ -20,7 +20,7 @@ public:
         , func(std::move(func))
     { }
 
-    auto empty() const -> bool {
+    auto empty() const {
         return input.empty();
     }
 
@@ -49,6 +49,14 @@ inline constexpr auto map = []<input_drange R, std::regular_invocable<reference_
 // equal(a, b) is true if all the elements of a and b compare equal with == and
 // a and b have the same number of elements
 inline constexpr auto equal = []<input_drange A, input_drange B>(A a, B b) -> bool {
+    // can't compare infinite ranges
+    static_assert(not (infinite_drange<A> and infinite_drange<B>));
+
+    // but if only one of them is infinite, that's clearly false
+    if constexpr (infinite_drange<A> or infinite_drange<B>) {
+        return false;
+    }
+
     if constexpr (sized_drange<A> and sized_drange<B>) {
         if (a.size() != b.size()) {
             return false;

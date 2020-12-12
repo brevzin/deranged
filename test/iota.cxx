@@ -21,6 +21,7 @@ TEST_CASE("iota infinite") {
     STATIC_REQUIRE(drng::input_drange<decltype(r)>);
     STATIC_REQUIRE(drng::forward_drange<decltype(r)>);
     STATIC_REQUIRE_FALSE(drng::sized_drange<decltype(r)>);
+    STATIC_REQUIRE(drng::infinite_drange<decltype(r)>);
 
     for (int i = 0; i < 100; ++i) {
         REQUIRE_FALSE(r.empty());
